@@ -1,8 +1,5 @@
--- NETRIX HUB FLUXO PVP 2.0 (Tudo Desativado por Padrão & Correção de Mortos no Chão)
-
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
--- Criando a Janela Principal
 local Window = Fluent:CreateWindow({
     Title = "NETRIX HUB FLUXO PVP 2.0",
     SubTitle = "by Netrix",
@@ -12,7 +9,6 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- Criando as Abas
 local Tabs = {
     Combat = Window:AddTab({ Title = "Combate", Icon = "crosshair" }),
     Visuals = Window:AddTab({ Title = "Visuals (ESP)", Icon = "eye" }),
@@ -20,7 +16,6 @@ local Tabs = {
     Discord = Window:AddTab({ Title = "Discord", Icon = "disc" })
 }
 
--- Serviços do Roblox
 local Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
@@ -32,7 +27,7 @@ local Camera = workspace.CurrentCamera
 
 local Settings = {
     Aimbot = false,
-    IgnoreDead = false, -- Desativado por padrão
+    IgnoreDead = false,
     FOVSize = 100,
     ShowFOV = false,
     
@@ -47,7 +42,6 @@ local Settings = {
     Speed = 16
 }
 
--- Círculo do FOV
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Color = Color3.fromRGB(0, 255, 255)
 FOVCircle.Thickness = 1.5
@@ -55,9 +49,6 @@ FOVCircle.Filled = false
 FOVCircle.Transparency = 0.8
 FOVCircle.Visible = false
 
--- ==========================================
--- BOTÃO FLUTUANTE CUSTOMIZADO
--- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "NetrixFloatingButtonGui"
 ScreenGui.ResetOnSpawn = false
@@ -76,7 +67,7 @@ FloatButton.Name = "NetrixFloatBtn"
 FloatButton.Parent = ScreenGui
 FloatButton.Size = UDim2.new(0, 55, 0, 55)
 FloatButton.Position = UDim2.new(0.05, 0, 0.2, 0)
-FloatButton.Image = "rbxassetid://113224789128479"
+FloatButton.Image = "rbxassetid://99262930883927"
 FloatButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 FloatButton.BackgroundTransparency = 0.2
 FloatButton.BorderSizePixel = 0
@@ -93,9 +84,6 @@ FloatButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==========================================
--- GERENCIAMENTO DE VELOCIDADE
--- ==========================================
 local function ApplySpeed()
     local char = LocalPlayer.Character
     if char then
@@ -122,9 +110,6 @@ Services.RunService.Stepped:Connect(function()
     end
 end)
 
--- ==========================================
--- LÓGICA DE ALVO COM FILTRO REAL DE MORTOS NO CHÃO
--- ==========================================
 local function GetClosestPlayer()
     local Target = nil
     local MaxDistance = Settings.FOVSize
@@ -138,13 +123,11 @@ local function GetClosestPlayer()
             local rootPart = char:FindFirstChild("HumanoidRootPart")
 
             if head and humanoid and rootPart then
-                -- Se a opção de ignorar mortos estiver ligada, faz a varredura rigorosa
                 if Settings.IgnoreDead then
                     if humanoid.Health <= 0 or humanoid:GetState() == Enum.HumanoidStateType.Dead or not char:IsDescendantOf(workspace) then
                         continue
                     end
                 else
-                    -- Mesmo com o botão desligado, o Aimbot nunca deve travar em quem já está morto com 0 de vida
                     if humanoid.Health <= 0 or humanoid:GetState() == Enum.HumanoidStateType.Dead then
                         continue
                     end
@@ -165,9 +148,6 @@ local function GetClosestPlayer()
     return Target
 end
 
--- ==========================================
--- ESP COMPLETO
--- ==========================================
 local CyanColor = Color3.fromRGB(0, 255, 255)
 local ESPDrawings = {}
 
@@ -210,16 +190,12 @@ end
 
 Services.Players.PlayerRemoving:Connect(RemoveESP)
 
--- ==========================================
--- LOOP PRINCIPAL (RENDERSTEPPED)
--- ==========================================
 Services.RunService.RenderStepped:Connect(function()
     local CenterScreen = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
     FOVCircle.Position = CenterScreen
     FOVCircle.Radius = Settings.FOVSize
     FOVCircle.Visible = Settings.ShowFOV
 
-    -- Aimbot Validado
     if Settings.Aimbot then
         local target = GetClosestPlayer()
         if target and target.Character then
@@ -232,12 +208,10 @@ Services.RunService.RenderStepped:Connect(function()
         end
     end
     
-    -- Spinbot Rápido
     if Settings.Spinbot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(150), 0)
     end
 
-    -- ESP Visuals
     for _, player in pairs(Services.Players:GetPlayers()) do
         if player ~= LocalPlayer then
             if not ESPDrawings[player] then CreateESP(player) end
@@ -317,11 +291,6 @@ Services.RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ==========================================
--- CONTROLES DA GUI (TUDO DESATIVADO POR PADRÃO)
--- ==========================================
-
--- COMBATE
 Tabs.Combat:AddToggle("Aimbot", { Title = "Aimbot Gruda na Cabeça", Default = false, Callback = function(v) Settings.Aimbot = v end })
 Tabs.Combat:AddToggle("IgnoreDead", { Title = "Ignorar Mortos no Chão", Default = false, Callback = function(v) Settings.IgnoreDead = v end })
 Tabs.Combat:AddToggle("ShowFOV", { Title = "Mostrar FOV", Default = false, Callback = function(v) Settings.ShowFOV = v end })
@@ -337,14 +306,12 @@ Tabs.Combat:AddSlider("FOVSize", {
     end
 })
 
--- VISUAIS
 Tabs.Visuals:AddToggle("ESPMaster", { Title = "Ativar ESP (Master)", Default = false, Callback = function(v) Settings.ESP_Master = v end })
 Tabs.Visuals:AddToggle("ESPPlayer", { Title = "ESP Player", Default = false, Callback = function(v) Settings.ESP_Player = v end })
 Tabs.Visuals:AddToggle("ESPBoxes", { Title = "ESP Boxes", Default = false, Callback = function(v) Settings.ESP_Boxes = v end })
 Tabs.Visuals:AddToggle("ESPLines", { Title = "ESP Lines", Default = false, Callback = function(v) Settings.ESP_Lines = v end })
 Tabs.Visuals:AddToggle("ESPNames", { Title = "ESP Name", Default = false, Callback = function(v) Settings.ESP_Names = v end })
 
--- MOVIMENTO
 Tabs.Movement:AddToggle("EnableSpeed", { Title = "Ativar Velocidade", Default = false, Callback = function(v) 
     Settings.EnableSpeed = v 
     ApplySpeed()
@@ -364,7 +331,6 @@ Tabs.Movement:AddSlider("Speed", {
 
 Tabs.Movement:AddToggle("Spinbot", { Title = "Spinbot", Default = false, Callback = function(v) Settings.Spinbot = v end })
 
--- OTIMIZAÇÃO DE TOUCH DOS SLIDERS
 task.spawn(function()
     task.wait(1)
     for _, gui in pairs(game.CoreGui:GetChildren()) do
@@ -378,12 +344,11 @@ task.spawn(function()
     end
 end)
 
--- DISCORD
 Tabs.Discord:AddButton({
     Title = "Copiar Link do Discord",
-    Description = "https://discord.gg/5TFHuucxgw",
+    Description = "https://discord.gg/yQyvXYM2CK",
     Callback = function()
-        setclipboard("https://discord.gg/5TFHuucxgw")
+        setclipboard("https://discord.gg/yQyvXYM2CK")
         Fluent:Notify({
             Title = "NETRIX HUB",
             Content = "Link do Discord copiado!",
@@ -393,4 +358,3 @@ Tabs.Discord:AddButton({
 })
 
 Window:SelectTab(1)
-
