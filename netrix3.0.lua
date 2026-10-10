@@ -1,45 +1,13 @@
--- NETRIX HUB FLUXO PVP 2.0 (Visual Remodelado)
-
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
-local IMAGE_ID = "rbxassetid://99262930883927"
-local BG_TRANSPARENCY = 0.88 -- 0 = imagem forte | 1 = invisível (ajuste a gosto)
-
--- ==========================================
--- JANELA PRINCIPAL
--- ==========================================
 local Window = Fluent:CreateWindow({
-    Title = "🔥 NETRIX HUB",
-    SubTitle = "Fluxo PVP 2.0  •  YouTube: @Netrix ofc",
-    TabWidth = 150,
-    Size = UDim2.fromOffset(580, 400),
-    Acrylic = true,
-    Theme = "Amethyst", -- Dark, Darker, Light, Aqua, Amethyst, Rose
+    Title = "NETRIX HUB FLUXO PVP 2.0",
+    SubTitle = "by Netrix",
+    TabWidth = 140,
+    Size = UDim2.fromOffset(530, 360),
+    Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
-
--- Imagem de fundo semi-transparente dentro do painel
-task.spawn(function()
-    pcall(function()
-        local Root = Window.Root
-        local Background = Instance.new("ImageLabel")
-        Background.Name = "NetrixBackground"
-        Background.Parent = Root
-        Background.AnchorPoint = Vector2.new(0.5, 0.5)
-        Background.Position = UDim2.fromScale(0.5, 0.5)
-        Background.Size = UDim2.fromScale(1, 1)
-        Background.BackgroundTransparency = 1
-        Background.Image = IMAGE_ID
-        Background.ImageTransparency = BG_TRANSPARENCY
-        Background.ScaleType = Enum.ScaleType.Crop
-        Background.ZIndex = 50
-        Background.Active = false -- não bloqueia cliques
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 10)
-        corner.Parent = Background
-    end)
-end)
 
 local Tabs = {
     Combat = Window:AddTab({ Title = "Combate", Icon = "crosshair" }),
@@ -48,14 +16,10 @@ local Tabs = {
     Discord = Window:AddTab({ Title = "Discord", Icon = "disc" })
 }
 
--- ==========================================
--- SERVIÇOS E CONFIGURAÇÕES
--- ==========================================
 local Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
-    UserInputService = game:GetService("UserInputService"),
-    TweenService = game:GetService("TweenService")
+    UserInputService = game:GetService("UserInputService")
 }
 
 local LocalPlayer = Services.Players.LocalPlayer
@@ -63,16 +27,16 @@ local Camera = workspace.CurrentCamera
 
 local Settings = {
     Aimbot = false,
-    IgnoreDead = true,
+    IgnoreDead = false,
     FOVSize = 100,
     ShowFOV = false,
-
+    
     ESP_Master = false,
     ESP_Boxes = false,
     ESP_Lines = false,
     ESP_Names = false,
     ESP_Player = false,
-
+    
     Spinbot = false,
     EnableSpeed = false,
     Speed = 16
@@ -85,9 +49,6 @@ FOVCircle.Filled = false
 FOVCircle.Transparency = 0.8
 FOVCircle.Visible = false
 
--- ==========================================
--- BOTÃO FLUTUANTE (QUADRADO ARREDONDADO)
--- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "NetrixFloatingButtonGui"
 ScreenGui.ResetOnSpawn = false
@@ -104,39 +65,18 @@ end
 local FloatButton = Instance.new("ImageButton")
 FloatButton.Name = "NetrixFloatBtn"
 FloatButton.Parent = ScreenGui
-FloatButton.AnchorPoint = Vector2.new(0.5, 0.5)
-FloatButton.Size = UDim2.fromOffset(64, 64)
-FloatButton.Position = UDim2.new(0.06, 0, 0.2, 0)
-FloatButton.Image = IMAGE_ID
-FloatButton.BackgroundTransparency = 1 -- sem cor ao redor
+FloatButton.Size = UDim2.new(0, 55, 0, 55)
+FloatButton.Position = UDim2.new(0.05, 0, 0.2, 0)
+FloatButton.Image = "rbxassetid://99262930883927"
+FloatButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+FloatButton.BackgroundTransparency = 0.2
 FloatButton.BorderSizePixel = 0
-FloatButton.AutoButtonColor = false
-FloatButton.ScaleType = Enum.ScaleType.Crop -- preenche o quadrado todo
 FloatButton.Active = true
 FloatButton.Draggable = true
 
--- Quadrado meio redondo (aumente o 16 para ficar mais redondo, diminua para mais quadrado)
-local FloatCorner = Instance.new("UICorner")
-FloatCorner.CornerRadius = UDim.new(0, 16)
-FloatCorner.Parent = FloatButton
-
-local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
-FloatButton.MouseEnter:Connect(function()
-    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(72, 72) }):Play()
-end)
-
-FloatButton.MouseLeave:Connect(function()
-    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(64, 64) }):Play()
-end)
-
-FloatButton.MouseButton1Down:Connect(function()
-    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(58, 58) }):Play()
-end)
-
-FloatButton.MouseButton1Up:Connect(function()
-    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(72, 72) }):Play()
-end)
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = FloatButton
 
 FloatButton.MouseButton1Click:Connect(function()
     if Window then
@@ -144,15 +84,16 @@ FloatButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==========================================
--- GERENCIAMENTO DE VELOCIDADE
--- ==========================================
 local function ApplySpeed()
     local char = LocalPlayer.Character
     if char then
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = Settings.EnableSpeed and Settings.Speed or 16
+            if Settings.EnableSpeed then
+                humanoid.WalkSpeed = Settings.Speed
+            else
+                humanoid.WalkSpeed = 16
+            end
         end
     end
 end
@@ -169,44 +110,37 @@ Services.RunService.Stepped:Connect(function()
     end
 end)
 
--- ==========================================
--- DETECÇÃO DE JOGADORES VIVOS
--- ==========================================
-local function IsPlayerAlive(player)
-    if not player or player == LocalPlayer then return false end
-
-    local char = player.Character
-    if not char or not char:IsDescendantOf(workspace) then return false end
-
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local head = char:FindFirstChild("Head")
-    local root = char:FindFirstChild("HumanoidRootPart")
-
-    if not humanoid or not head or not root then return false end
-    if humanoid.Health <= 0 then return false end
-
-    local state = humanoid:GetState()
-    if state == Enum.HumanoidStateType.Dead or state == Enum.HumanoidStateType.Physics then
-        return false
-    end
-
-    return true
-end
-
 local function GetClosestPlayer()
     local Target = nil
     local MaxDistance = Settings.FOVSize
     local CenterScreen = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
     for _, player in pairs(Services.Players:GetPlayers()) do
-        if IsPlayerAlive(player) then
-            local head = player.Character.Head
-            local headPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-            if onScreen then
-                local distance = (Vector2.new(headPos.X, headPos.Y) - CenterScreen).Magnitude
-                if distance <= MaxDistance then
-                    MaxDistance = distance
-                    Target = player
+        if player ~= LocalPlayer and player.Character then
+            local char = player.Character
+            local head = char:FindFirstChild("Head")
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            local rootPart = char:FindFirstChild("HumanoidRootPart")
+
+            if head and humanoid and rootPart then
+                if Settings.IgnoreDead then
+                    if humanoid.Health <= 0 or humanoid:GetState() == Enum.HumanoidStateType.Dead or not char:IsDescendantOf(workspace) then
+                        continue
+                    end
+                else
+                    if humanoid.Health <= 0 or humanoid:GetState() == Enum.HumanoidStateType.Dead then
+                        continue
+                    end
+                end
+
+                local headPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+                if onScreen then
+                    local distance = (Vector2.new(headPos.X, headPos.Y) - CenterScreen).Magnitude
+
+                    if distance <= MaxDistance then
+                        MaxDistance = distance
+                        Target = player
+                    end
                 end
             end
         end
@@ -214,9 +148,6 @@ local function GetClosestPlayer()
     return Target
 end
 
--- ==========================================
--- SISTEMA ESP
--- ==========================================
 local CyanColor = Color3.fromRGB(0, 255, 255)
 local ESPDrawings = {}
 
@@ -228,14 +159,14 @@ local function CreateESP(player)
         Line = Drawing.new("Line"),
         Name = Drawing.new("Text")
     }
-
+    
     drawings.Box.Color = CyanColor
     drawings.Box.Thickness = 1.5
     drawings.Box.Filled = false
-
+    
     drawings.Line.Color = CyanColor
     drawings.Line.Thickness = 1
-
+    
     drawings.Name.Color = CyanColor
     drawings.Name.Size = 13
     drawings.Name.Center = true
@@ -251,7 +182,7 @@ local function RemoveESP(player)
         end
         ESPDrawings[player] = nil
     end
-
+    
     if player.Character and player.Character:FindFirstChild("NetrixChams") then
         player.Character.NetrixChams:Destroy()
     end
@@ -259,9 +190,6 @@ end
 
 Services.Players.PlayerRemoving:Connect(RemoveESP)
 
--- ==========================================
--- LOOP PRINCIPAL
--- ==========================================
 Services.RunService.RenderStepped:Connect(function()
     local CenterScreen = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
     FOVCircle.Position = CenterScreen
@@ -272,36 +200,37 @@ Services.RunService.RenderStepped:Connect(function()
         local target = GetClosestPlayer()
         if target and target.Character then
             local head = target.Character:FindFirstChild("Head")
-            if head then
+            local humanoid = target.Character:FindFirstChildOfClass("Humanoid")
+            
+            if head and humanoid and humanoid.Health > 0 then
                 Camera.CFrame = CFrame.new(Camera.CFrame.Position, head.Position)
             end
         end
     end
-
+    
     if Settings.Spinbot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = LocalPlayer.Character.HumanoidRootPart
-        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(150), 0)
+        LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(150), 0)
     end
 
     for _, player in pairs(Services.Players:GetPlayers()) do
         if player ~= LocalPlayer then
             if not ESPDrawings[player] then CreateESP(player) end
-
+            
             local drawings = ESPDrawings[player]
-            local isAlive = IsPlayerAlive(player)
-
-            if Settings.ESP_Master and isAlive then
-                local char = player.Character
+            local char = player.Character
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            
+            if Settings.ESP_Master and char and humanoid and humanoid.Health > 0 then
                 local cframe, size = char:GetBoundingBox()
                 local screenPos, onScreen = Camera:WorldToViewportPoint(cframe.Position)
-
+                
                 if onScreen then
                     local topWorld = cframe.Position + Vector3.new(0, size.Y / 2, 0)
                     local bottomWorld = cframe.Position - Vector3.new(0, size.Y / 2, 0)
-
+                    
                     local topScreen = Camera:WorldToViewportPoint(topWorld)
                     local bottomScreen = Camera:WorldToViewportPoint(bottomWorld)
-
+                    
                     local height = math.abs(topScreen.Y - bottomScreen.Y)
                     local width = height / 1.6
 
@@ -356,40 +285,15 @@ Services.RunService.RenderStepped:Connect(function()
                 drawings.Box.Visible = false
                 drawings.Line.Visible = false
                 drawings.Name.Visible = false
-                if player.Character and player.Character:FindFirstChild("NetrixChams") then
-                    player.Character.NetrixChams.Enabled = false
-                end
+                if char and char:FindFirstChild("NetrixChams") then char.NetrixChams.Enabled = false end
             end
         end
     end
 end)
 
--- ==========================================
--- INTERFACE: ABA COMBATE
--- ==========================================
-Tabs.Combat:AddSection("🎯 Mira")
-
-Tabs.Combat:AddToggle("Aimbot", {
-    Title = "Aimbot",
-    Description = "Trava a mira na cabeça do alvo mais próximo",
-    Default = false,
-    Callback = function(v) Settings.Aimbot = v end
-})
-
-Tabs.Combat:AddToggle("IgnoreDead", {
-    Title = "Ignorar Mortos",
-    Description = "Não mira em jogadores que já morreram",
-    Default = true,
-    Callback = function(v) Settings.IgnoreDead = v end
-})
-
-Tabs.Combat:AddSection("⭕ Campo de Visão (FOV)")
-
-Tabs.Combat:AddToggle("ShowFOV", {
-    Title = "Mostrar Círculo de FOV",
-    Default = false,
-    Callback = function(v) Settings.ShowFOV = v end
-})
+Tabs.Combat:AddToggle("Aimbot", { Title = "Aimbot Gruda na Cabeça", Default = false, Callback = function(v) Settings.Aimbot = v end })
+Tabs.Combat:AddToggle("IgnoreDead", { Title = "Ignorar Mortos no Chão", Default = false, Callback = function(v) Settings.IgnoreDead = v end })
+Tabs.Combat:AddToggle("ShowFOV", { Title = "Mostrar FOV", Default = false, Callback = function(v) Settings.ShowFOV = v end })
 
 Tabs.Combat:AddSlider("FOVSize", {
     Title = "Tamanho do FOV",
@@ -397,67 +301,48 @@ Tabs.Combat:AddSlider("FOVSize", {
     Max = 500,
     Default = 100,
     Rounding = 0,
-    Callback = function(v) Settings.FOVSize = v end
-})
-
--- ==========================================
--- INTERFACE: ABA VISUALS
--- ==========================================
-Tabs.Visuals:AddSection("👁️ ESP")
-
-Tabs.Visuals:AddToggle("ESPMaster", {
-    Title = "Ativar ESP (Master)",
-    Description = "Liga ou desliga todos os recursos visuais",
-    Default = false,
-    Callback = function(v) Settings.ESP_Master = v end
-})
-
-Tabs.Visuals:AddSection("✨ Estilos")
-
-Tabs.Visuals:AddToggle("ESPPlayer", { Title = "Chams (Realce de Player)", Default = false, Callback = function(v) Settings.ESP_Player = v end })
-Tabs.Visuals:AddToggle("ESPBoxes", { Title = "Caixas (Boxes)", Default = false, Callback = function(v) Settings.ESP_Boxes = v end })
-Tabs.Visuals:AddToggle("ESPLines", { Title = "Linhas", Default = false, Callback = function(v) Settings.ESP_Lines = v end })
-Tabs.Visuals:AddToggle("ESPNames", { Title = "Nomes", Default = false, Callback = function(v) Settings.ESP_Names = v end })
-
--- ==========================================
--- INTERFACE: ABA MOVIMENTO
--- ==========================================
-Tabs.Movement:AddSection("⚡ Velocidade")
-
-Tabs.Movement:AddToggle("EnableSpeed", {
-    Title = "Ativar Velocidade",
-    Default = false,
-    Callback = function(v)
-        Settings.EnableSpeed = v
-        ApplySpeed()
+    Callback = function(v) 
+        Settings.FOVSize = v 
     end
 })
 
+Tabs.Visuals:AddToggle("ESPMaster", { Title = "Ativar ESP (Master)", Default = false, Callback = function(v) Settings.ESP_Master = v end })
+Tabs.Visuals:AddToggle("ESPPlayer", { Title = "ESP Player", Default = false, Callback = function(v) Settings.ESP_Player = v end })
+Tabs.Visuals:AddToggle("ESPBoxes", { Title = "ESP Boxes", Default = false, Callback = function(v) Settings.ESP_Boxes = v end })
+Tabs.Visuals:AddToggle("ESPLines", { Title = "ESP Lines", Default = false, Callback = function(v) Settings.ESP_Lines = v end })
+Tabs.Visuals:AddToggle("ESPNames", { Title = "ESP Name", Default = false, Callback = function(v) Settings.ESP_Names = v end })
+
+Tabs.Movement:AddToggle("EnableSpeed", { Title = "Ativar Velocidade", Default = false, Callback = function(v) 
+    Settings.EnableSpeed = v 
+    ApplySpeed()
+end })
+
 Tabs.Movement:AddSlider("Speed", {
-    Title = "Valor da Velocidade",
+    Title = "Aumentar Velocidade",
     Min = 16,
     Max = 300,
     Default = 16,
     Rounding = 0,
-    Callback = function(v)
-        Settings.Speed = v
+    Callback = function(v) 
+        Settings.Speed = v 
         ApplySpeed()
     end
 })
 
-Tabs.Movement:AddSection("🌀 Extras")
-
 Tabs.Movement:AddToggle("Spinbot", { Title = "Spinbot", Default = false, Callback = function(v) Settings.Spinbot = v end })
 
--- ==========================================
--- INTERFACE: ABA DISCORD
--- ==========================================
-Tabs.Discord:AddSection("💬 Comunidade")
-
-Tabs.Discord:AddParagraph({
-    Title = "Entre no nosso Discord!",
-    Content = "Novidades, suporte e atualizações do NETRIX HUB."
-})
+task.spawn(function()
+    task.wait(1)
+    for _, gui in pairs(game.CoreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui.Name:find("Fluent") then
+            for _, v in pairs(gui:GetDescendants()) do
+                if v:IsA("Frame") and (v.Name:find("Slider") or v.Name:find("Bar")) then
+                    v.Active = true
+                end
+            end
+        end
+    end
+end)
 
 Tabs.Discord:AddButton({
     Title = "Copiar Link do Discord",
@@ -473,9 +358,3 @@ Tabs.Discord:AddButton({
 })
 
 Window:SelectTab(1)
-
-Fluent:Notify({
-    Title = "NETRIX HUB",
-    Content = "Script carregado com sucesso! 🔥",
-    Duration = 5
-})
