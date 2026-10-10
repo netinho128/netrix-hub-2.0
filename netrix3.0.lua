@@ -1,4 +1,4 @@
--- NETRIX HUB FLUXO PVP 3.0 (Visual Remodelado)
+-- NETRIX HUB FLUXO PVP 2.0 (Visual Remodelado)
 
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
@@ -10,7 +10,7 @@ local BG_TRANSPARENCY = 0.88 -- 0 = imagem forte | 1 = invisível (ajuste a gost
 -- ==========================================
 local Window = Fluent:CreateWindow({
     Title = "🔥 NETRIX HUB",
-    SubTitle = "Fluxo PVP 3.0  •  YouTube: @Netrix ofc",
+    SubTitle = "Fluxo PVP 2.0  •  YouTube: @Netrix ofc",
     TabWidth = 150,
     Size = UDim2.fromOffset(580, 400),
     Acrylic = true,
@@ -86,7 +86,7 @@ FOVCircle.Transparency = 0.8
 FOVCircle.Visible = false
 
 -- ==========================================
--- BOTÃO FLUTUANTE (QUADRADO REDONDINHO / ARRASTÁVEL)
+-- BOTÃO FLUTUANTE (QUADRADO ARREDONDADO)
 -- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "NetrixFloatingButtonGui"
@@ -111,69 +111,36 @@ FloatButton.Image = IMAGE_ID
 FloatButton.BackgroundTransparency = 1 -- sem cor ao redor
 FloatButton.BorderSizePixel = 0
 FloatButton.AutoButtonColor = false
-FloatButton.ScaleType = Enum.ScaleType.Fit
+FloatButton.ScaleType = Enum.ScaleType.Crop -- preenche o quadrado todo
 FloatButton.Active = true
+FloatButton.Draggable = true
 
--- AJUSTE 1: quadrado com cantos arredondados (aumente o 16 para ficar mais redondo)
+-- Quadrado meio redondo (aumente o 16 para ficar mais redondo, diminua para mais quadrado)
 local FloatCorner = Instance.new("UICorner")
 FloatCorner.CornerRadius = UDim.new(0, 16)
 FloatCorner.Parent = FloatButton
 
 local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-local function SizeTo(n)
-    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(n, n) }):Play()
-end
-
 FloatButton.MouseEnter:Connect(function()
-    SizeTo(72)
+    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(72, 72) }):Play()
 end)
 
 FloatButton.MouseLeave:Connect(function()
-    SizeTo(64)
+    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(64, 64) }):Play()
 end)
 
--- AJUSTE 2: botou o dedo em cima, puxa pra cima/baixo/lados e ele acompanha.
--- Toque rápido (sem arrastar) minimiza/abre o menu.
-local dragging = false
-local moved = false
-local dragStart
-local startPos
-
-FloatButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-    or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        moved = false
-        dragStart = input.Position
-        startPos = FloatButton.Position
-        SizeTo(58)
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-                SizeTo(64)
-                if not moved and Window then
-                    Window:Minimize()
-                end
-            end
-        end)
-    end
+FloatButton.MouseButton1Down:Connect(function()
+    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(58, 58) }):Play()
 end)
 
-Services.UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-    or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        if delta.Magnitude > 6 then
-            moved = true
-        end
-        if moved then
-            FloatButton.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
-        end
+FloatButton.MouseButton1Up:Connect(function()
+    Services.TweenService:Create(FloatButton, tweenInfo, { Size = UDim2.fromOffset(72, 72) }):Play()
+end)
+
+FloatButton.MouseButton1Click:Connect(function()
+    if Window then
+        Window:Minimize()
     end
 end)
 
@@ -398,121 +365,6 @@ Services.RunService.RenderStepped:Connect(function()
 end)
 
 -- ==========================================
--- SLIDER GRUDADO (arrasta pra qualquer lado sem soltar)
--- ==========================================
-local FluentGui = nil
-pcall(function()
-    FluentGui = Window.Root:FindFirstAncestorWhichIsA("ScreenGui")
-end)
-
-local function AddStickySlider(tab, id, config)
-    -- guarda o que já existe na tela pra achar só o que o slider criar
-    local before = {}
-    if FluentGui then
-        for _, d in ipairs(FluentGui:GetDescendants()) do
-            before[d] = true
-        end
-    end
-
-    local Slider = tab:AddSlider(id, config)
-
-    pcall(function()
-        if not FluentGui then return end
-
-        local fresh = {}
-        local list = {}
-        for _, d in ipairs(FluentGui:GetDescendants()) do
-            if not before[d] then
-                fresh[d] = true
-                table.insert(list, d)
-            end
-        end
-
-        -- acha a bolinha do slider; a barra é o "pai" dela
-        local dot
-        for _, d in ipairs(list) do
-            if d:IsA("GuiObject") and (d:IsA("ImageLabel") or d:IsA("Frame"))
-            and d.Size.X.Scale == 0 and d.Size.Y.Scale == 0
-            and d.Size.X.Offset >= 6 and d.Size.X.Offset <= 24
-            and d.Size.Y.Offset >= 6 and d.Size.Y.Offset <= 24 then
-                dot = d
-                break
-            end
-        end
-        if not dot or not dot.Parent or not dot.Parent:IsA("GuiObject") then return end
-        local rail = dot.Parent
-
-        -- área de toque grande em volta da barra (não precisa acertar a bolinha)
-        local hit = Instance.new("TextButton")
-        hit.Name = "NetrixSliderHit"
-        hit.Text = ""
-        hit.BackgroundTransparency = 1
-        hit.BorderSizePixel = 0
-        hit.AutoButtonColor = false
-        hit.Active = true
-        hit.AnchorPoint = Vector2.new(0.5, 0.5)
-        hit.Position = UDim2.new(0.5, 0, 0.5, 0)
-        hit.Size = UDim2.new(1, 40, 0, 56)
-        hit.ZIndex = 100
-        hit.Parent = rail
-
-        local dragging = false
-        local activeType = nil
-        local scroller = nil
-
-        local function setFromX(x)
-            local w = rail.AbsoluteSize.X
-            if w <= 0 then return end
-            local s = math.clamp((x - rail.AbsolutePosition.X) / w, 0, 1)
-            local mn = Slider.Min or config.Min
-            local mx = Slider.Max or config.Max
-            Slider:SetValue(mn + (mx - mn) * s)
-        end
-
-        local function stopDrag()
-            if not dragging then return end
-            dragging = false
-            activeType = nil
-            if scroller then
-                scroller.ScrollingEnabled = true
-                scroller = nil
-            end
-        end
-
-        hit.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                activeType = input.UserInputType
-                -- trava a rolagem da aba enquanto arrasta (pra não bugar subindo/descendo)
-                scroller = hit:FindFirstAncestorWhichIsA("ScrollingFrame")
-                if scroller then
-                    scroller.ScrollingEnabled = false
-                end
-                setFromX(input.Position.X)
-            end
-        end)
-
-        -- continua seguindo o dedo mesmo que ele saia de cima da barra (cima/baixo/lados)
-        Services.UserInputService.InputChanged:Connect(function(input)
-            if not dragging then return end
-            if (activeType == Enum.UserInputType.Touch and input.UserInputType == Enum.UserInputType.Touch)
-            or (activeType == Enum.UserInputType.MouseButton1 and input.UserInputType == Enum.UserInputType.MouseMovement) then
-                setFromX(input.Position.X)
-            end
-        end)
-
-        Services.UserInputService.InputEnded:Connect(function(input)
-            if dragging and input.UserInputType == activeType then
-                stopDrag()
-            end
-        end)
-    end)
-
-    return Slider
-end
-
--- ==========================================
 -- INTERFACE: ABA COMBATE
 -- ==========================================
 Tabs.Combat:AddSection("🎯 Mira")
@@ -539,7 +391,7 @@ Tabs.Combat:AddToggle("ShowFOV", {
     Callback = function(v) Settings.ShowFOV = v end
 })
 
-AddStickySlider(Tabs.Combat, "FOVSize", {
+Tabs.Combat:AddSlider("FOVSize", {
     Title = "Tamanho do FOV",
     Min = 30,
     Max = 500,
@@ -581,5 +433,49 @@ Tabs.Movement:AddToggle("EnableSpeed", {
     end
 })
 
-AddStickySlider(Tabs.Movement, "Speed", {
-        
+Tabs.Movement:AddSlider("Speed", {
+    Title = "Valor da Velocidade",
+    Min = 16,
+    Max = 300,
+    Default = 16,
+    Rounding = 0,
+    Callback = function(v)
+        Settings.Speed = v
+        ApplySpeed()
+    end
+})
+
+Tabs.Movement:AddSection("🌀 Extras")
+
+Tabs.Movement:AddToggle("Spinbot", { Title = "Spinbot", Default = false, Callback = function(v) Settings.Spinbot = v end })
+
+-- ==========================================
+-- INTERFACE: ABA DISCORD
+-- ==========================================
+Tabs.Discord:AddSection("💬 Comunidade")
+
+Tabs.Discord:AddParagraph({
+    Title = "Entre no nosso Discord!",
+    Content = "Novidades, suporte e atualizações do NETRIX HUB."
+})
+
+Tabs.Discord:AddButton({
+    Title = "Copiar Link do Discord",
+    Description = "https://discord.gg/yQyvXYM2CK",
+    Callback = function()
+        setclipboard("https://discord.gg/yQyvXYM2CK")
+        Fluent:Notify({
+            Title = "NETRIX HUB",
+            Content = "Link do Discord copiado!",
+            Duration = 4
+        })
+    end
+})
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "NETRIX HUB",
+    Content = "Script carregado com sucesso! 🔥",
+    Duration = 5
+})
